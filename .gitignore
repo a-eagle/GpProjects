@@ -1,0 +1,13 @@
+*.sdf
+*.sln
+*.suo
+*.EBK
+Debug
+Release
+*.user
+*.bin
+*.vcxproj*
+*.txt
+ipch
+*.aps
+*.rc

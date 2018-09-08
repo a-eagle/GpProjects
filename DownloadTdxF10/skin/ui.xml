@@ -1,0 +1,15 @@
+#################### main-page ############
+<Window text = "HgtUI" rect = "0 0 500 400"  bgcolor="#FFB6C1" style="popup sys-menu min-box" maxable="false" bgimage="b.bmp"  >
+	<default class="Button" normalImage="ext_button.bmp [0 48 75 24] 9patch" hoverImage="ext_button.bmp [0 24 75 24] 9patch" pushImage="ext_button.bmp [0 0 75 24] 9patch" />
+	<default class="VerScrollBar" rect="0 0 15 100%" track="color://#99aabbcc" thumb="color://#696969" />
+	
+	<WindowBar rect="0 0 100% 35" bgimage="color://#80F0E68C" />
+	
+	<Label rect="20 55 80% 25" text="下载Tdx F10 贝格数据" />
+	
+	<Button id="JYBD_btn" rect="50 100 80 30" text="下载交易必读" />
+	
+	<Button id="THBJ_btn" rect="250 100 80 30" text="下载同行比较" />
+	
+	
+</Window>

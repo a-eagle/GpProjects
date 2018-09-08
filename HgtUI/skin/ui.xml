@@ -1,0 +1,15 @@
+#################### main-page ############
+<Window text = "HgtUI" rect = "0 0 1000 700"  bgcolor="#FFB6C1" style="popup sys-menu min-box" maxable="false" bgimage="b.bmp stretch"  >
+	<default class="Button" normalImage="ext_button.bmp [0 48 75 24] 9patch" hoverImage="ext_button.bmp [0 24 75 24] 9patch" pushImage="ext_button.bmp [0 0 75 24] 9patch" />
+	<default class="VerScrollBar" rect="0 0 15 100%" track="#99ccbbaa" thumb="#696969" />
+	
+	<WindowBar rect="0 0 100% 35" bgimage="#808CE6F0" />
+	
+	<TextArea id="area" rect="50 60 700 100" bgcolor="#50F5F0FF" font="size:18;" />
+	
+	<Button id="export_btn" rect="760 60 80 30" text="Export" />
+	<Button id="query_btn" rect="760 110 80 30" text="Query" />
+	
+	<Table id="table" rect="50 170 800 500" bgcolor="#D0BFC5CD" selRowBgImage="#faAED8EE" font="size:18;"  columnHeaderImage="ext_button.bmp [0 48 75 24] 9patch"/>
+	
+</Window>
