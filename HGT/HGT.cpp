@@ -9,9 +9,9 @@
 #include "utils/Http.h"
 #include "db/SqlDriver.h"
 
-char wbuf[1024 * 1024];
-int wpos;
-char token[128];
+static char wbuf[1024 * 1024];
+static int wpos;
+static char token[128];
 
 SqlConnection *db;
 PreparedStatement *stmt, *stmt2;
@@ -217,6 +217,9 @@ int save_db_new(int day, int num) {
 }
 
 int init_mysql() {
+	if (db != NULL) {
+		return 1;
+	}
 	db = SqlConnection::open("mysql://localhost:3306/tdx_f10", "root", "root");
 	stmt = db->prepareStatement("insert into _hgt (_code, _day, _jme, _mrje, _mcje, _cjje) values (?, ?, ?, ?, ?, ?)");
 	
@@ -500,8 +503,11 @@ int main_get_new(int argc, char** argv) {
 	return 0;
 }
 
+extern int main_history(int argc, char** argv);
+
 int main(int argc, char** argv) {
 	main_get_new(argc, argv);
+	main_history(argc, argv);
 	// main_get_all(argc, argv);
 	
 	/*
@@ -514,7 +520,7 @@ int main(int argc, char** argv) {
 	CloseHandle(pi.hThread);
 	CloseHandle(pi.hProcess);
 	*/
-	system("pause");
+	//system("pause");
 	return 0;
 }
 
