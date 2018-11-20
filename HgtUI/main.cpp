@@ -157,7 +157,7 @@ public:
 		SetForegroundWindow(top);
 
 		INPUT in[20];
-		sprintf(inc, "%s\n", code);
+		sprintf(inc, "%s", code);
 		memset(in, 0, sizeof(in));
 		for (int i = 0; i < strlen(inc); ++i) {
 			in[i * 2].type = INPUT_KEYBOARD;
@@ -169,6 +169,10 @@ public:
 		}
 		SendInput(strlen(inc) * 2, in, sizeof(INPUT));
 
+		in[0].ki.wVk = VK_RETURN;
+		in[1].ki.wVk = VK_RETURN;
+		Sleep(300);
+		SendInput(2, in, sizeof(INPUT));
 		// keybd_event(VK_RETURN, 0, 0, 0);
 		// keybd_event(VK_RETURN, 0, KEYEVENTF_KEYUP, 0);
 	}

@@ -509,7 +509,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
 	UIFactory::init();
 	XBinFile::getInstance()->load("DownloadTdxF10.bin");
-	win = (VWindow *) UIFactory::fastBuild("xbin://skin/ui.xml", "main-page", NULL);
+	win = (VWindow *) UIFactory::fastBuild("skin/ui.xml", "main-page", NULL);
 
 	win->findById("JYBD_btn")->setListener(new BtnListener());
 	win->findById("THBJ_btn")->setListener(new BtnListener());
