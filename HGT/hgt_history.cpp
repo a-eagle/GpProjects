@@ -203,9 +203,8 @@ int main_history(int argc, char** argv) {
 	}
 
 	ok = db->commit();
-	if (ok) printf("Commit ok\n");
-	else printf("Commit fail\n");
+	if (ok) printf("\nCommit ok\n");
+	else printf("\nCommit fail\n");
 _end:
-	system("pause");
 	return 0;
 }

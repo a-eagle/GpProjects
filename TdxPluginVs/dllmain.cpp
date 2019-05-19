@@ -54,6 +54,12 @@ void THBJ_PM_REF(int len, float* out, float* ids, float* code, float* c) {
 	GetThbjPM((int)code[len - 1], out, len);
 }
 
+//通达信，同行业个数 
+void TH_NUM_REF(int len, float* out, float* ids, float* code, float* c) {
+	// OpenIO();
+	GetThNum((int)code[len - 1], out, len);
+}
+
 //------------------------------------------------------------------------------
 PluginTCalcFuncInfo g_CalcFuncSets[] = {
 	{1, (pPluginFUNC) & BeginLock_REF},
@@ -62,6 +68,7 @@ PluginTCalcFuncInfo g_CalcFuncSets[] = {
 	{120, (pPluginFUNC) & TdxZJ_REF},
 	{122, (pPluginFUNC) & STRING_REF},
 	{125, (pPluginFUNC) & THBJ_PM_REF},
+	{126, (pPluginFUNC) & TH_NUM_REF},
 
 	{0, NULL},
 };

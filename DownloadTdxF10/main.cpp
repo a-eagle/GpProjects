@@ -51,6 +51,7 @@ bool BtnListener::onEvent(VComponent *src, Msg *msg) {
 	} else if (strcmp(id, "THBJ_btn") == 0) {
 		download_THBJ();
 	}
+	return true;
 }
 
 char *GetF10Content() {

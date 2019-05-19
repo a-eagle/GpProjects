@@ -12,3 +12,4 @@ void GetZJMax(float *out, int len);
 
 void GetThbjPM(int code, float *out, int len);
 
+void GetThNum(int code, float *out, int len);

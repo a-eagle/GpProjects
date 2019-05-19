@@ -476,7 +476,7 @@ int main_get_new(int argc, char** argv) {
 		--ld;
 		if (ld > newDay) newDay = ld;
 	}
-
+	int errCode = 1;
 	while ((newDay = next_day(newDay)) != 0) {
 		sprintf(sday, "%d-%02d-%02d", newDay / 10000, newDay / 100 % 100, newDay % 100);
 		printf("Fetch %s: ", sday);
@@ -484,6 +484,7 @@ int main_get_new(int argc, char** argv) {
 			if (parse_top10_v2()) {
 				if (save_db_new(newDay, 20)) {
 					printf("OK \n");
+					errCode = 0;
 				} else {
 					printf("Save DB Fail %s \n", db->getError());
 					// break;
@@ -500,14 +501,18 @@ int main_get_new(int argc, char** argv) {
 	
 	_endx:
 	printf("\n--------------END--------------\n");
-	return 0;
+	return errCode;
 }
 
 extern int main_history(int argc, char** argv);
 
 int main(int argc, char** argv) {
-	main_get_new(argc, argv);
-	main_history(argc, argv);
+	int errCode = main_get_new(argc, argv);
+	if (errCode == 0) {
+		main_history(argc, argv);
+	}
+	system("pause");
+	
 	// main_get_all(argc, argv);
 	
 	/*
