@@ -1,0 +1,259 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" type="text/css" href="my.css" > 
+<link rel="stylesheet" type="text/css" href="easyui/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="easyui/themes/icon.css">
+
+<script type="text/javascript" src="my.js"></script>
+<script type="text/javascript" src="db.js"></script>
+<script type="text/javascript" src="easyui/jquery.min.js"></script>
+<script type="text/javascript" src="easyui/jquery.easyui.min.js"></script>
+
+<script type='text/javascript' >
+	var DATA = [];
+	var DATA_ZS = [];
+	
+	function print(text) {
+		$(document.body).append(text);
+	}
+	
+	function println(text) {
+		$(document.body).append(text + '</br>');
+	}
+	
+	// day = yyyyMMdd
+	function nextDay(day) {
+		var d = new Date();
+		d.setFullYear(parseInt(day / 10000));
+		var m = parseInt(day / 100 % 100) - 1;
+		d.setMonth(m);
+		d.setDate(parseInt(day % 100));
+		d.setHours(0, 0, 1, 0);
+		while (true) {
+			var t = d.getTime();
+			t += 24 * 3600 * 1000;
+			d.setTime(t);
+			if (d.getDay() > 0 && d.getDay() < 6) {
+				break;
+			}
+			if (d.getTime() > (new Date()).getTime()) {
+				return 0;
+			}
+		}
+		return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+	}
+	
+	function dayToString(day) {
+		var y = parseInt(day / 10000);
+		var m = parseInt(day / 100 % 100);
+		var d = parseInt(day % 100);
+		if (m < 10) m = '0' + m;
+		if (d < 10) d = '0' + d;
+		return '' + y + '-' + m + '-' + d;
+	}
+	
+	function parseTop10(res, day) {
+		var p1 = res.indexOf('var DATA1');
+		if (p1 < 0) {
+			return {ok:false, msg:'Not find "var DATA1"'};
+		}
+		var p1e = res.indexOf(']};', p1);
+		
+		var p2 = res.indexOf('var DATA2', p1);
+		if (p2 < 0) {
+			return {ok:false, msg:'Not find "var DATA2"'};
+		}
+		var p2e = res.indexOf(']};', p2);
+		
+		var px = res.substring(p1, p2e);
+		// console.log('px---:' + px);
+		
+		var data = [];
+		var c = 0;
+		for (var i = 0; i < 20; ++i) {
+			var item = {};
+			item.day = day;
+			c = px.indexOf('"Code":"', c);
+			if (c < 0) break;
+			item.code = px.substring(c + 8, c + 8 + 6);
+			
+			c = px.indexOf("GTJME", c);
+			item.jme = parseInt(parseInt(px.substring(c + 7, c + 7 + 15)) / 10000);
+			
+			c = px.indexOf("GTMRJE", c);
+			item.mrje = parseInt(parseInt(px.substring(c + 8, c + 8 + 15)) / 10000);
+			
+			c = px.indexOf("GTMCJE", c);
+			item.mcje = parseInt(parseInt(px.substring(c + 8, c + 8 + 15)) / 10000);
+			
+			c = px.indexOf("GTCJJE", c);
+			item.cjje = parseInt(parseInt(px.substring(c + 8, c + 8 + 15)) / 10000);
+			c += 10;
+			data.push(item);
+		}
+		return {ok:true, msg:'OK', data:data};
+	}
+	
+	function saveDB() {
+		println('Begin save db...');
+		// var a = DB._db.setAutoCommit(false);
+		
+		var lastDay = 0;
+		for (var i = 0; i < DATA.length; ++i) {
+			var it = DATA[i];
+			var sql = "insert into _hgt (_code, _day, _jme, _mrje, _mcje, _cjje) values ('" + 
+						it.code + "', " + it.day + "," + it.jme + "," + it.mrje + "," + it.mcje + "," + it.cjje + ")";
+			// console.log(sql);
+			var num = DB._db.executeUpdate(sql);
+			if (num != 1) {
+				println('&nbsp;&nbsp;&nbsp; save db fail. &nbsp;&nbsp; ' + it.code + ' ---&gt; &nbsp; ' + it.day);
+				break;
+			}
+			if (lastDay < it.day) {
+				lastDay = it.day;
+			}
+		}
+		for (var i = 0; i < DATA_ZS.length; ++i) {
+			var it = DATA_ZS[i];
+			var sql = "insert into _hgt (_code, _day, _jme) values ('" + it.code + "', " + it.day + "," + it.jme + ")";
+			// console.log(sql);
+			var num = DB._db.executeUpdate(sql);
+			if (num != 1) {
+				console.log(num);
+				println('&nbsp;&nbsp;&nbsp; save db fail. &nbsp;&nbsp; ' + it.code + ' ---&gt; &nbsp; ' + it.day + ' &nbsp; &nbsp; ' + DB._db.getError());
+				break;
+			}
+		}
+		println('End save db. Finish');
+	}
+
+	function tryNextDay(curDay) {
+		if ((curDay = nextDay(curDay)) == 0) {
+			saveDB();
+			return;
+		}
+		var sday = dayToString(curDay);
+		print("Fetch  " + sday);
+		$.ajax({url:'http://data.eastmoney.com/hsgt/top10/' + sday + '.html', success:function(res) {
+			var data = parseTop10(res, curDay);
+			// console.log(data);
+			if (! data.ok) {
+				println(' &nbsp;&nbsp;---&gt;&nbsp; ' + data.msg);
+				return;
+			}
+			if (data.data.length == 0) {
+				println(' &nbsp;&nbsp;---&gt;&nbsp; No data');
+				setTimeout('tryNextDay(' + curDay + ')', 500);
+				return;
+			}
+			println('&nbsp;&nbsp;---&gt;&nbsp; OK');
+			var dd = data.data;
+			
+			for (var i = 0; i < dd.length; ++i) {
+				DATA.push(dd[i]);
+			}
+			setTimeout('tryNextDay(' + curDay + ')', 500);
+		}});
+	}
+	
+	function dateDiff(minDate, maxDate) {
+		var d = new Date();
+		d.setFullYear(parseInt(minDate / 10000));
+		var m = parseInt(minDate / 100 % 100) - 1;
+		d.setMonth(m);
+		d.setDate(parseInt(minDate % 100));
+		d.setHours(0, 0, 1, 0);
+		
+		maxDate.setHours(0, 0, 1, 0);
+		
+		var dd = maxDate.getTime() - d.getTime();
+		return parseInt(dd / 24 / 3600 / 1000) + 1;
+	}
+	
+	function getHgtHistory(market, daysNum, token, lastDay) {
+		var u = "http://dcfm.eastmoney.com/EM_MutiSvcExpandInterface/api/js/get?type=HSGTHIS&token=" + token + 
+				"&filter=(MarketType=" + market + 
+				")&js=var%%20hLEmuMFI={%%22data%%22:(x),%%22pages%%22:(tp)}&ps=" + daysNum + 
+				"&p=1&sr=-1&st=DetailDate&rt=51397258";
+		
+		$.ajax({url:u, async:false, success: function(res) {
+			var c = 0;
+			while (true) {
+				var p1 = res.indexOf('DetailDate', c);
+				c += 30;
+				if (p1 < 0) {
+					break;
+				}
+				var item = {};
+				if (market == 1) item.code = '999999';
+				else item.code = '399001';
+				// console.log(res.substring(p1));
+				p1 += 10;
+				while (res.charAt(p1) < '0' ||  res.charAt(p1) > '9') ++p1;
+				
+				var day = res.substring(p1, p1 + 10);
+				day = day.replace('-', '');
+				day = day.replace('-', '');
+				item.day = parseInt(day);
+				
+				p1 = res.indexOf('DRZJLR', p1);
+				while (res.charAt(p1) != ':') ++p1;
+				++p1;
+				var p2 = res.indexOf(',', p1);
+				var n = res.substring(p1, p2);
+				if (n.indexOf('.') > 0) n = n.substring(0, n.indexOf('.'));
+				item.jme = parseInt(n / 100);
+				
+				// console.log(item);
+				if (item.day > lastDay || true) {
+					DATA_ZS.push(item);
+				}
+				c = p2;
+			}
+		}});
+	}
+	
+	function getHistoryZS(newDayZs, newDay) {
+		$.ajax({url:'http://data.eastmoney.com/hsgt/000001.html', success:function(res) {
+			var p1 = res.indexOf('token=');
+			if (p1 < 0) {
+				println('Get token fail');
+				return;
+			}
+			var p2 = res.indexOf('&', p1);
+			var token = res.substring(p1 + 6, p2);
+			var d = DB.query("select max(_day) as m from _hgt where _code = '999999' ", true);
+			var lastDay = parseInt(d[0].m);
+			var daysNum = dateDiff(lastDay, new Date());
+			
+			println("ZS last-day:" + lastDay + "&nbsp;&nbsp;&nbsp; daysNum: " + daysNum);
+			getHgtHistory(1, daysNum, token, newDay);
+			getHgtHistory(3, daysNum, token, newDay);
+			
+			setTimeout('tryNextDay(' + newDay + ')', 500);
+		}});
+	}
+	
+	$(function() {
+		document.title = 'HGT';
+		var rs = DB.query("select max(_day) as m from _hgt where _code = '999999' ", true);
+		var newDayZs = parseInt(rs[0].m);
+		rs = DB.query("select max(_day) as m from _hgt where _code != '999999' and _code != '399001' ", true);
+		newDay = parseInt(rs[0].m);
+		
+		println("DB ZS last day: " + newDayZs + ' &nbsp;&nbsp;  last day: ' + newDay + '</br>');
+		
+		setTimeout('getHistoryZS(' + newDayZs + ',' + newDay + ')', 500);
+	});
+</script>
+
+</head>
+
+<body style="padding: 30px 80px;font-size:26;">
+	
+	
+	
+</body>
+
+</html>

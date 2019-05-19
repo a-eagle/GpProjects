@@ -1,0 +1,43 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" type="text/css" href="my.css" > 
+<link rel="stylesheet" type="text/css" href="easyui/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="easyui/themes/icon.css">
+
+<script type="text/javascript" src="my.js"></script>
+<script type="text/javascript" src="office.js"></script>
+<script type="text/javascript" src="easyui/jquery.min.js"></script>
+<script type="text/javascript" src="easyui/jquery.easyui.min.js"></script>
+
+<script type='text/javascript' >
+	$(function() {
+		var data = DB.query("select * from _base limit 100");
+		$('#base_table').datagrid('loadData', data);
+		
+		var wb = Office.readXLSX('PKA.xlsx');
+		console.log(wb.getSheetNames());
+		var sh = wb.getSheet('AAA');
+		console.log(sh);
+	});
+</script>
+
+</head>
+
+<body>
+
+<table id='base_table' class="easyui-datagrid" title="Base Table" style="width:720px;height:100%" data-options="singleSelect:true,collapsible:false">
+	<thead>
+		<tr>
+			<th data-options="field:'_id',width:60,align:'center'">ID</th>
+			<th data-options="field:'_code',width:100,align:'center'">代码</th>
+			<th data-options="field:'_name',width:150,align:'center'">名称</th>
+			<th data-options="field:'_hy',width:380,align:'left'">  行业</th>
+		</tr>
+	</thead>
+</table>
+
+
+</body>
+
+</html>
