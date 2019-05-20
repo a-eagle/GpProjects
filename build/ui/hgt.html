@@ -99,6 +99,15 @@
 		return {ok:true, msg:'OK', data:data};
 	}
 	
+	function formatJme(jme) {
+		var m = jme.toString();
+		var len = 8 - m.length;
+		for (var i = 0; i < len; ++i) {
+			m += '&nbsp;';
+		}
+		return m;
+	}
+	
 	function saveDB() {
 		println('Begin save db...');
 		// var a = DB._db.setAutoCommit(false);
@@ -108,27 +117,35 @@
 			var it = DATA[i];
 			var sql = "insert into _hgt (_code, _day, _jme, _mrje, _mcje, _cjje) values ('" + 
 						it.code + "', " + it.day + "," + it.jme + "," + it.mrje + "," + it.mcje + "," + it.cjje + ")";
-			// console.log(sql);
-			println(sql);
+			
+			print('&nbsp;&nbsp;&nbsp; save &nbsp;(' + it.code + " &nbsp;&nbsp;&nbsp; " + it.day + "&nbsp;&nbsp;&nbsp;" + formatJme(it.jme) + ')');
 			var num = DB._db.executeUpdate(sql);
 			if (num != 1) {
-				println('&nbsp;&nbsp;&nbsp; save db fail. &nbsp;&nbsp; ' + it.code + ' ---&gt; &nbsp; ' + it.day);
+				// println('&nbsp;&nbsp;&nbsp; save db fail. &nbsp;&nbsp; ' + it.code + ' ---&gt; &nbsp; ' + it.day);
+				println('&nbsp;&nbsp;&nbsp; --&gt; Fail');
 				break;
+			} else {
+				println('&nbsp;&nbsp;&nbsp; --&gt; OK');
 			}
 			if (lastDay < it.day) {
 				lastDay = it.day;
 			}
 		}
+		
+		println('');
+		
 		for (var i = 0; i < DATA_ZS.length; ++i) {
 			var it = DATA_ZS[i];
 			var sql = "insert into _hgt (_code, _day, _jme) values ('" + it.code + "', " + it.day + "," + it.jme + ")";
-			// console.log(sql);
-			println(sql);
+			
+			print('&nbsp;&nbsp;&nbsp; save &nbsp;(' + it.code + " &nbsp;&nbsp;&nbsp; " + it.day + "&nbsp;&nbsp;&nbsp;" + formatJme(it.jme) + ')');
 			var num = DB._db.executeUpdate(sql);
 			if (num != 1) {
-				console.log(num);
-				println('&nbsp;&nbsp;&nbsp; save db fail. &nbsp;&nbsp; ' + it.code + ' ---&gt; &nbsp; ' + it.day + ' &nbsp; &nbsp; ' + DB._db.getError());
+				// println('&nbsp;&nbsp;&nbsp; save db fail. &nbsp;&nbsp; ' + it.code + ' ---&gt; &nbsp; ' + it.day + ' &nbsp; &nbsp; ' + DB._db.getError());
+				println('&nbsp;&nbsp;&nbsp; --&gt; Fail');
 				break;
+			} else {
+				println('&nbsp;&nbsp;&nbsp; --&gt; OK');
 			}
 		}
 		println('End save db. Finish');
