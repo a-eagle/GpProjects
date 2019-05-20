@@ -30,6 +30,10 @@
 		d.setMonth(m);
 		d.setDate(parseInt(day % 100));
 		d.setHours(0, 0, 1, 0);
+		
+		var curDate = new Date();
+		curDate.setHours(0, 0, 1, 0);
+		
 		while (true) {
 			var t = d.getTime();
 			t += 24 * 3600 * 1000;
@@ -37,9 +41,9 @@
 			if (d.getDay() > 0 && d.getDay() < 6) {
 				break;
 			}
-			if (d.getTime() > (new Date()).getTime()) {
-				return 0;
-			}
+		}
+		if (d.getTime() > curDate.getTime()) {
+			return 0;
 		}
 		return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
 	}
@@ -105,6 +109,7 @@
 			var sql = "insert into _hgt (_code, _day, _jme, _mrje, _mcje, _cjje) values ('" + 
 						it.code + "', " + it.day + "," + it.jme + "," + it.mrje + "," + it.mcje + "," + it.cjje + ")";
 			// console.log(sql);
+			println(sql);
 			var num = DB._db.executeUpdate(sql);
 			if (num != 1) {
 				println('&nbsp;&nbsp;&nbsp; save db fail. &nbsp;&nbsp; ' + it.code + ' ---&gt; &nbsp; ' + it.day);
@@ -118,6 +123,7 @@
 			var it = DATA_ZS[i];
 			var sql = "insert into _hgt (_code, _day, _jme) values ('" + it.code + "', " + it.day + "," + it.jme + ")";
 			// console.log(sql);
+			println(sql);
 			var num = DB._db.executeUpdate(sql);
 			if (num != 1) {
 				console.log(num);
@@ -168,7 +174,7 @@
 		maxDate.setHours(0, 0, 1, 0);
 		
 		var dd = maxDate.getTime() - d.getTime();
-		return parseInt(dd / 24 / 3600 / 1000) + 1;
+		return parseInt(dd / 24 / 3600 / 1000);
 	}
 	
 	function getHgtHistory(market, daysNum, token, lastDay) {
@@ -206,7 +212,7 @@
 				item.jme = parseInt(n / 100);
 				
 				// console.log(item);
-				if (item.day > lastDay || true) {
+				if (item.day > lastDay) {
 					DATA_ZS.push(item);
 				}
 				c = p2;
@@ -223,13 +229,11 @@
 			}
 			var p2 = res.indexOf('&', p1);
 			var token = res.substring(p1 + 6, p2);
-			var d = DB.query("select max(_day) as m from _hgt where _code = '999999' ", true);
-			var lastDay = parseInt(d[0].m);
-			var daysNum = dateDiff(lastDay, new Date());
+			var daysNum = dateDiff(newDayZs, new Date());
 			
-			println("ZS last-day:" + lastDay + "&nbsp;&nbsp;&nbsp; daysNum: " + daysNum);
-			getHgtHistory(1, daysNum, token, newDay);
-			getHgtHistory(3, daysNum, token, newDay);
+			println("ZS last-day:" + newDayZs + "&nbsp;&nbsp;&nbsp; daysNum: " + daysNum);
+			getHgtHistory(1, daysNum, token, newDayZs);
+			getHgtHistory(3, daysNum, token, newDayZs);
 			
 			setTimeout('tryNextDay(' + newDay + ')', 500);
 		}});
@@ -238,9 +242,13 @@
 	$(function() {
 		document.title = 'HGT';
 		var rs = DB.query("select max(_day) as m from _hgt where _code = '999999' ", true);
-		var newDayZs = parseInt(rs[0].m);
+		var m = rs[0].m;
+		var newDayZs = parseInt(m == '' ? 0 : m);
+		if (newDayZs == 0) newDayZs = 20150101;
+		
 		rs = DB.query("select max(_day) as m from _hgt where _code != '999999' and _code != '399001' ", true);
 		newDay = parseInt(rs[0].m);
+		
 		
 		println("DB ZS last day: " + newDayZs + ' &nbsp;&nbsp;  last day: ' + newDay + '</br>');
 		
