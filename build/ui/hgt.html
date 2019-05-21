@@ -256,8 +256,10 @@
 		}});
 	}
 	
+	
 	$(function() {
 		document.title = 'HGT';
+		
 		var rs = DB.query("select max(_day) as m from _hgt where _code = '999999' ", true);
 		var m = rs[0].m;
 		var newDayZs = parseInt(m == '' ? 0 : m);
@@ -266,8 +268,8 @@
 		rs = DB.query("select max(_day) as m from _hgt where _code != '999999' and _code != '399001' ", true);
 		newDay = parseInt(rs[0].m);
 		
-		
 		println("DB ZS last day: " + newDayZs + ' &nbsp;&nbsp;  last day: ' + newDay + '</br>');
+		
 		
 		setTimeout('getHistoryZS(' + newDayZs + ',' + newDay + ')', 500);
 	});
