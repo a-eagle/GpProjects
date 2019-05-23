@@ -30,7 +30,7 @@ BOOL needQuery;
 void InitMysql() {
 	if (stmt2 != 0) return;
 	db.connect("tdx_f10");
-	stmt2 = db.prepare("select _day, _jme, _cjje from _hgt where _code = ?");
+	stmt2 = db.prepare("select _day, _jme, _cjje from _hgt where _code = ? order by _day asc");
 	if (stmt2) stmt2->setBindCapacity(48, 256);
 }
 
