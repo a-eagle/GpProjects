@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include "mysql.h"
 
-#include "D:/Program Files/MySQL/MySQL Server 5.1/include/mysql.h"
-#pragma comment(lib, "D:/Program Files/MySQL/MySQL Server 5.1/lib/opt/libmysql.lib")
+#include "D:/Program Files/MySQL/MySQL Server 5.5/include/mysql.h"
+#pragma comment(lib, "D:/Program Files/MySQL/MySQL Server 5.5/lib/libmysql.lib")
 
 ResultSet::ResultSet(void *obj) :mObj(obj) ,mRow(0){
 }

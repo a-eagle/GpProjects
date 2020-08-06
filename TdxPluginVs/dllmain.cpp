@@ -39,7 +39,9 @@ void TdxZJ_REF(int len, float* out, float* ids, float* vals, float *c) {
 		CalcHgtZJ(out, len);
 	} else if (id == 21) {
 		CalcHgtZJAbs(out, len);
-	}
+	} else if (id == 30) {
+		CalcHgtCJJE(out, len);
+	} 
 }
 
 void STRING_REF(int len, float* out, float* code, float* b, float* c) {

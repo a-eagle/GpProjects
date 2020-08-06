@@ -15,22 +15,24 @@ enum ID_PARAM {
 
 struct HGT {
 	int day;
-	int jme, cjje;
+	int jme;
+	int mrje, mcje, cjje;
 };
 
 int params[IP_NUM];
-int days[2000];
+int days[20000];
 int daysLen;
 int zjMax;
-HGT hgt[2000];
+HGT hgt[20000];
 int hgtLen;
+bool isZS; // zhi shu ?
 
 BOOL needQuery;
 
 void InitMysql() {
 	if (stmt2 != 0) return;
 	db.connect("tdx_f10");
-	stmt2 = db.prepare("select _day, _jme, _cjje from _hgt where _code = ? order by _day asc");
+	stmt2 = db.prepare("select _day, _jme, _mrje, _mcje , _cjje from _hgt where _code = ? order by _day asc");
 	if (stmt2) stmt2->setBindCapacity(48, 256);
 }
 
@@ -63,6 +65,7 @@ void QueryResult() {
 	int MAX_DL = sizeof(days)/sizeof(int);
 	char code[8];
 	sprintf(code, "%06d", params[IP_CODE]);
+	isZS = (params[IP_CODE] == 999999) || (params[IP_CODE] == 399001) || (params[IP_CODE] == 399006);
 	memset(hgt, 0, sizeof hgt);
 	
 	stmt2->reset();
@@ -71,6 +74,8 @@ void QueryResult() {
 	stmt2->setResult(0, Statement::CT_INT);
 	stmt2->setResult(1, Statement::CT_INT);
 	stmt2->setResult(2, Statement::CT_INT);
+	stmt2->setResult(3, Statement::CT_INT);
+	stmt2->setResult(4, Statement::CT_INT);
 	stmt2->bindResult();
 	stmt2->exec();
 	stmt2->storeResult();
@@ -82,7 +87,9 @@ void QueryResult() {
 		HGT *p = &hgt[hgtLen];
 		p->day = stmt2->getInt(0);
 		p->jme = stmt2->getInt(1);
-		p->cjje = stmt2->getInt(2);
+		p->mrje = stmt2->getInt(2);
+		p->mcje = stmt2->getInt(3);
+		p->cjje = stmt2->getInt(4);
 		++hgtLen;
 	}
 }
@@ -91,6 +98,9 @@ inline int FindDay(int day, int from) {
 	for (int i = from; i < daysLen; ++i) {
 		if (days[i] == day)
 			return i;
+		if (days[i] > day) {
+			return -1;
+		}
 	}
 	return -1;
 }
@@ -108,7 +118,7 @@ void CalcHgtZJ(float *out, int len) {
 			continue;
 		}
 		from = j + 1;
-		out[begin + j] = p->jme;
+		out[begin + j] = isZS ? p->jme : (float)p->jme / 10000;
 		//printf("day = %d out[%d]=%d \n", p->day, j+begin, (int)out[begin + j]);
 	}
 	//for (int i = 0; i < begin; ++i) out[i] = 0;
@@ -119,6 +129,25 @@ void CalcHgtZJAbs(float *out, int len) {
 	for (int i = 0; i < len; ++i) {
 		if (out[i] < 0) out[i] = -out[i];
 	}
+}
+
+void CalcHgtCJJE(float *out, int len) {
+	QueryResult();
+	memset(out, 0, sizeof(float) * len);
+	int begin = len - daysLen;
+	int from = 0;
+	for (int i = 0; i < hgtLen; ++i) {
+		HGT *p = &hgt[i];
+		int j = FindDay(p->day, from);
+		if (j == -1) {
+			//out[begin + j] = 0;
+			continue;
+		}
+		from = j + 1;
+		out[begin + j] = isZS ? p->cjje : (float)p->cjje / 10000;
+		//printf("day = %d out[%d]=%d \n", p->day, j+begin, (int)out[begin + j]);
+	}
+	//for (int i = 0; i < begin; ++i) out[i] = 0;
 }
 
 void GetZJMax(float *out, int len) {
